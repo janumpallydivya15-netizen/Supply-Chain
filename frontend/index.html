@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supply Chain Disruption Command Center</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Dark Navy Sidebar -->
+    <aside class="sidebar" id="sidebar" aria-label="Main Navigation">
+      <div class="sidebar-brand">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div class="brand-icon" aria-hidden="true">SC</div>
+          <div>
+            <div class="brand-title">SupplyChain</div>
+            <div class="brand-subtitle">Command Center</div>
+          </div>
+        </div>
+        <button class="sidebar-close" id="sidebarCloseBtn" aria-label="Close navigation sidebar">&times;</button>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-label">Operations</div>
+        <a href="#overview" class="nav-item active" data-section="overview">
+          <span class="nav-icon" aria-hidden="true">📊</span>
+          <span>Overview</span>
+        </a>
+        <a href="#disruptions" class="nav-item" data-section="disruptions">
+          <span class="nav-icon" aria-hidden="true">⚠️</span>
+          <span>Disruptions</span>
+        </a>
+        <a href="#shipments" class="nav-item" data-section="shipments">
+          <span class="nav-icon" aria-hidden="true">🚢</span>
+          <span>Shipments</span>
+        </a>
+        <a href="#inventory" class="nav-item" data-section="inventory">
+          <span class="nav-icon" aria-hidden="true">📦</span>
+          <span>Inventory</span>
+        </a>
+
+        <div class="nav-label" style="margin-top: 14px;">Intelligence (Future)</div>
+        <a href="#recovery-plans" class="nav-item" data-section="recovery-plans">
+          <span class="nav-icon" aria-hidden="true">🧠</span>
+          <span>Recovery Plans</span>
+        </a>
+        <a href="#audit-trail" class="nav-item" data-section="audit-trail">
+          <span class="nav-icon" aria-hidden="true">📋</span>
+          <span>Audit Trail</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="phase-pill">
+          <span class="pulse-dot" aria-hidden="true"></span>
+          <span>Phase 3: DB & Approvals</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper">
+      <!-- Top Navigation Header -->
+      <header class="top-header">
+        <div class="header-left">
+          <button class="menu-toggle" id="sidebarToggleBtn" aria-label="Toggle mobile menu">☰</button>
+          <div class="page-title-block">
+            <h1 id="pageHeading">Operations Overview</h1>
+            <div class="header-subtitle">Real-time supply chain disruption monitoring & early warning telemetry</div>
+          </div>
+        </div>
+
+        <div class="header-right">
+          <!-- API Connection Status Badge -->
+          <div class="api-status-badge" id="apiStatusBadge">
+            <span class="status-dot"></span>
+            <span id="apiStatusText">Connecting...</span>
+          </div>
+
+          <!-- Refresh Data Button -->
+          <button class="btn btn-outline" id="refreshBtn" title="Fetch fresh records from backend API">
+            <span id="refreshIcon">🔄</span>
+            <span id="refreshBtnText">Refresh</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Content Body -->
+      <main class="content-body" id="mainContent">
+        <!-- Notification Alert Container -->
+        <div class="alert-container" id="alertContainer"></div>
+
+        <!-- Illustrative Mock Data Notice -->
+        <div class="notice-banner">
+          <div>
+            <span class="notice-badge">Phase 3 Active</span>
+            <strong>Persistent Database & Human-in-the-Loop Governance:</strong> Multi-agent recovery playbooks are persisted in SQLite. Actions require simulated operator approval before execution simulation.
+          </div>
+          <div style="font-size: 0.75rem; color: var(--text-muted);" id="executionModeNotice">
+            Persistence: SQLite Connected
+          </div>
+        </div>
+
+        <!-- Section 1: Dashboard Summary Cards (Overview) -->
+        <section id="section-metrics" class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-info">
+              <span class="metric-title">Total Shipments</span>
+              <span class="metric-value" id="metricTotalShipments">--</span>
+              <span class="metric-context">Active transit & completed</span>
+            </div>
+            <div class="metric-icon-wrap metric-icon-blue" aria-hidden="true">🚢</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-info">
+              <span class="metric-title">Delayed Shipments</span>
+              <span class="metric-value" id="metricDelayedShipments" style="color: var(--danger);">--</span>
+              <span class="metric-context">Requires route / carrier attention</span>
+            </div>
+            <div class="metric-icon-wrap metric-icon-red" aria-hidden="true">⏱️</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-info">
+              <span class="metric-title">Low-Stock Items</span>
+              <span class="metric-value" id="metricLowStockItems" style="color: var(--warning);">--</span>
+              <span class="metric-context">Below safety stock threshold</span>
+            </div>
+            <div class="metric-icon-wrap metric-icon-orange" aria-hidden="true">📉</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-info">
+              <span class="metric-title">Open Disruptions</span>
+              <span class="metric-value" id="metricOpenDisruptions" style="color: var(--info);">--</span>
+              <span class="metric-context">Active incidents flagged</span>
+            </div>
+            <div class="metric-icon-wrap metric-icon-purple" aria-hidden="true">⚡</div>
+          </div>
+        </section>
+
+        <!-- Section 2: Priority Disruptions -->
+        <section id="section-disruptions" class="dashboard-section">
+          <div class="section-header">
+            <div class="section-title-wrap">
+              <h2>Priority Disruptions</h2>
+              <div class="section-description">High-impact operational incidents requiring agent investigation</div>
+            </div>
+            <span class="badge badge-critical" id="disruptionCountBadge">3 Active Incidents</span>
+          </div>
+          <div class="disruptions-grid" id="disruptionsGrid">
+            <!-- Dynamically populated via JS -->
+            <div style="grid-column: 1 / -1; padding: 20px; text-align: center; color: var(--text-muted);">
+              Loading disruption records...
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 3: Shipment Monitoring -->
+        <section id="section-shipments" class="dashboard-section">
+          <div class="section-header">
+            <div class="section-title-wrap">
+              <h2>Shipment Monitoring</h2>
+              <div class="section-description">Multi-modal tracking for inbound parts and outbound distribution</div>
+            </div>
+
+            <div class="table-filter-bar">
+              <label for="shipmentStatusFilter">Filter by Status:</label>
+              <select id="shipmentStatusFilter" class="filter-select">
+                <option value="All">All Statuses</option>
+                <option value="Delayed">Delayed</option>
+                <option value="In Transit">In Transit</option>
+                <option value="Rerouted">Rerouted</option>
+                <option value="Delivered">Delivered</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="enterprise-table" id="shipmentsTable">
+              <thead>
+                <tr>
+                  <th>Shipment ID</th>
+                  <th>Supplier</th>
+                  <th>Product</th>
+                  <th>Quantity</th>
+                  <th>Destination</th>
+                  <th>Expected Arrival</th>
+                  <th>Status</th>
+                  <th>Risk Level</th>
+                </tr>
+              </thead>
+              <tbody id="shipmentsTableBody">
+                <tr>
+                  <td colspan="8" style="text-align: center; padding: 24px; color: var(--text-muted);">
+                    Loading shipment registry...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Section 4: Inventory Health -->
+        <section id="section-inventory" class="dashboard-section">
+          <div class="section-header">
+            <div class="section-title-wrap">
+              <h2>Inventory Health</h2>
+              <div class="section-description">Warehouse buffer levels and SKU safety stock monitoring</div>
+            </div>
+          </div>
+
+          <div class="inventory-list" id="inventoryList">
+            <!-- Dynamically populated via JS -->
+            <div style="padding: 20px; text-align: center; color: var(--text-muted);">
+              Loading warehouse stock records...
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 5: Recovery Plans -->
+        <section id="section-recovery-plans" class="dashboard-section">
+          <div class="section-header">
+            <div class="section-title-wrap">
+              <h2>AI Recovery Playbooks & Human Approval</h2>
+              <div class="section-description">Persisted multi-agent mitigation options with operator approval and safe simulation</div>
+            </div>
+            <div class="section-actions">
+              <span class="badge badge-healthy" id="recoveryPlanStatusBadge">0 Active Plans</span>
+            </div>
+          </div>
+
+          <div id="recoveryPlansContent">
+            <!-- Dynamically populated from SQLite via JS -->
+            <div class="placeholder-card">
+              <div class="placeholder-icon" aria-hidden="true">🤖</div>
+              <h3>No Active Recovery Plans Found</h3>
+              <p>
+                Click <strong>"Analyze Disruption"</strong> on any incident above to orchestrate the multi-agent investigation fleet. Formulated playbooks will be persisted here for human review, cost verification, and safe execution simulation.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 6: Audit Trail -->
+        <section id="section-audit-trail" class="dashboard-section">
+          <div class="section-header">
+            <div class="section-title-wrap">
+              <h2>Audit Trail & Decision Governance</h2>
+              <div class="section-description">Immutable append-only log of agent findings, operator approvals, plan status changes, and safe simulation events</div>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <span class="badge badge-transit" id="auditEventCountBadge">0 Total Events</span>
+              <button class="btn btn-outline btn-sm" id="auditRefreshBtn" type="button" title="Refresh Audit Trail">⟳ Refresh</button>
+            </div>
+          </div>
+
+          <!-- Audit Trail Filter Controls -->
+          <div class="filter-bar" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; background: var(--bg-card); padding: 14px 18px; border-radius: 8px; border: 1px solid var(--border-color); align-items: center;">
+            <div style="display: flex; flex-direction: column; min-width: 160px; flex: 1;">
+              <label for="auditEventTypeFilter" style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; font-weight: 600;">Event Type</label>
+              <select id="auditEventTypeFilter" class="form-control" style="background: var(--bg-dark); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 4px; padding: 6px 10px; font-size: 13px;">
+                <option value="">All Event Types</option>
+                <option value="DISRUPTION_ANALYSIS_COMPLETED">Disruption Analysis Completed</option>
+                <option value="RECOVERY_PLAN_CREATED">Recovery Plan Created</option>
+                <option value="OPTION_APPROVED">Option Approved</option>
+                <option value="OPTION_REJECTED">Option Rejected</option>
+                <option value="ACTION_SIMULATION_EXECUTED">Action Simulation Executed</option>
+                <option value="PLAN_STATUS_CHANGED">Plan Status Changed</option>
+                <option value="ANALYSIS_FAILED">Analysis Failed</option>
+                <option value="SYSTEM_INITIALIZED">System Initialized</option>
+              </select>
+            </div>
+
+            <div style="display: flex; flex-direction: column; min-width: 120px;">
+              <label for="auditShipmentFilter" style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; font-weight: 600;">Shipment ID</label>
+              <input type="text" id="auditShipmentFilter" placeholder="e.g. SH-101" class="form-control" style="background: var(--bg-dark); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 4px; padding: 6px 10px; font-size: 13px; text-transform: uppercase;" />
+            </div>
+
+            <div style="display: flex; flex-direction: column; min-width: 180px; flex: 2;">
+              <label for="auditSearchFilter" style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; font-weight: 600;">Keyword Search</label>
+              <input type="text" id="auditSearchFilter" placeholder="Search actor, reason, details..." class="form-control" style="background: var(--bg-dark); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 4px; padding: 6px 10px; font-size: 13px;" />
+            </div>
+
+            <div style="display: flex; gap: 8px; align-self: flex-end;">
+              <button class="btn btn-primary btn-sm" id="auditApplyFiltersBtn" type="button">Filter</button>
+              <button class="btn btn-outline btn-sm" id="auditClearFiltersBtn" type="button">Reset</button>
+            </div>
+          </div>
+
+          <!-- Audit Table -->
+          <div class="table-responsive">
+            <table class="enterprise-table" id="auditTrailTable">
+              <thead>
+                <tr>
+                  <th style="width: 140px;">Timestamp</th>
+                  <th style="width: 170px;">Event Type</th>
+                  <th style="width: 110px;">Shipment</th>
+                  <th style="width: 160px;">Actor</th>
+                  <th>Action Summary & Governance Notes</th>
+                  <th style="width: 90px; text-align: center;">Outcome</th>
+                  <th style="width: 80px; text-align: center;">Details</th>
+                </tr>
+              </thead>
+              <tbody id="auditTrailTableBody">
+                <tr>
+                  <td colspan="7" style="text-align: center; padding: 24px; color: var(--text-muted);">
+                    Loading immutable audit trail from SQLite database...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Audit Pagination -->
+          <div id="auditPagination" style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; padding: 10px 14px; background: var(--bg-card); border-radius: 6px; border: 1px solid var(--border-color);">
+            <div style="font-size: 13px; color: var(--text-muted);" id="auditPaginationInfo">
+              Showing page 1 of 1
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-outline btn-sm" id="auditPrevPageBtn" type="button" disabled>&larr; Previous</button>
+              <button class="btn btn-outline btn-sm" id="auditNextPageBtn" type="button" disabled>Next &rarr;</button>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Disruption Detail & Analysis Modal -->
+  <div class="modal-overlay" id="disruptionModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 id="modalTitle">Disruption Incident Details</h3>
+        <button class="modal-close-btn" id="modalCloseBtn" aria-label="Close dialog">&times;</button>
+      </div>
+
+      <div class="modal-body" id="modalBody">
+        <!-- Populated dynamically via JS -->
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="modalDismissBtn" type="button">Close</button>
+        <button class="btn btn-primary" id="modalAnalyzeBtn" type="button">
+          <span>⚡ Analyze Disruption</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 4: Audit Event Detail Modal -->
+  <div class="modal-overlay" id="auditEventModal" role="dialog" aria-modal="true" aria-labelledby="auditEventModalTitle">
+    <div class="modal-container" style="max-width: 650px;">
+      <div class="modal-header">
+        <h3 id="auditEventModalTitle">Audit Event Governance Record</h3>
+        <button class="modal-close-btn" id="auditEventModalCloseBtn" aria-label="Close audit dialog">&times;</button>
+      </div>
+
+      <div class="modal-body" id="auditEventModalBody">
+        <!-- Populated dynamically with full audit payload -->
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="auditEventModalDismissBtn" type="button">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Application Script (v=8 with Syntax Bug Fixes & Resilient Connection Handlers) -->
+  <script src="js/app.js?v=8"></script>
+</body>
+</html>
